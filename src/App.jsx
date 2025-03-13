@@ -3,20 +3,33 @@ import { useState } from 'react';
 import GameCard from './components/GameCard';
 
 const App = () => {
+  const [currentStreak, setCurrentStreak] = useState(0);
+
+  const handleStreak = () => {
+
+  };
+
+  const handleShuffle = () => {
+
+  }
+
   let [numCard, setNumCard] = useState(1);
-  let  [cardsLeft, setCardsLeft] = useState(10);
+  
 
 
-  const updateCardsNum = () => {
+  const updateNextCardsNum = () => {
     if (numCard <= 10) {
       setNumCard(numCard + 1);
-      setCardsLeft(cardsLeft -1);
+    }
+  }
+  const updatePrevCardsNum = () => {
+    if (numCard >= 1) {
+      setNumCard(numCard -1);
     }
   }
 
   const resetFlashCard = () => {
     setNumCard(numCard = 1);
-    setCardsLeft(cardsLeft = 10);
   }
 
 
@@ -85,15 +98,14 @@ const App = () => {
       <h2>How much knowledge of Data Structure and Algorithm do you know? Test it here!</h2>
       <h4>Number of cards: 11</h4>
       <h4>Card Number: #{numCard}</h4>
-      <h4>Cards Left: {cardsLeft}</h4>
       <br/>
-      {numCard <= triviaGame.length ? (
+      {numCard <= triviaGame.length  && numCard >= 1 ? (
         <GameCard key={numCard} question={triviaGame[numCard - 1].question} answer= {triviaGame[numCard - 1].answer} level={triviaGame[numCard - 1].id}/>
       ): (
         <p>No more cards left!!</p>
       )}
-      
-      <button type='button' className='nextCard'onClick={updateCardsNum}>→</button>
+      <button type='button' className='previousCard'onClick={updatePrevCardsNum}>⭠</button>
+      <button type='button' className='nextCard'onClick={updateNextCardsNum}>→</button>
       <button className='reset-button' onClick={resetFlashCard}>↻</button>
     </div>
   )
