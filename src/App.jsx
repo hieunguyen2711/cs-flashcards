@@ -4,7 +4,7 @@ import GameCard from './components/GameCard';
 
 const App = () => {
   let [numCard, setNumCard] = useState(1);
-  let [cardsLeft, setCardsLeft] = useState(10);
+  let  [cardsLeft, setCardsLeft] = useState(10);
 
 
   const updateCardsNum = () => {
