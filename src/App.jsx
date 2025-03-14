@@ -4,12 +4,16 @@ import GameCard from './components/GameCard';
 
 const App = () => {
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [inputs, setInputs] = useState('')
 
   const handleStreak = () => {
-
+    setCurrentStreak(currentStreak + 1);
   };
 
   const handleShuffle = () => {
+
+  }
+  const checkAnswer = () => {
 
   }
 
@@ -98,15 +102,29 @@ const App = () => {
       <h2>How much knowledge of Data Structure and Algorithm do you know? Test it here!</h2>
       <h4>Number of cards: 11</h4>
       <h4>Card Number: #{numCard}</h4>
+      <h4>Current Streak: {currentStreak}</h4>
+    
       <br/>
       {numCard <= triviaGame.length  && numCard >= 1 ? (
         <GameCard key={numCard} question={triviaGame[numCard - 1].question} answer= {triviaGame[numCard - 1].answer} level={triviaGame[numCard - 1].id}/>
       ): (
         <p>No more cards left!!</p>
       )}
+      <form className='container'>
+        <div className='mini-container'>
+          Guess the answer here: 
+          <input type='text' name='answer' placeholder='Place your answer here...' onChange={(e) => setInputs((prevState) => ({
+            ...prevState,
+            [e.target.name]: e.target.value,
+          }))}>
+          </input>
+          <button type='submit' className='submit-Btn' onClick={checkAnswer}>Submit Guess</button>
+        </div>
+      </form>
       <button type='button' className='previousCard'onClick={updatePrevCardsNum}>⭠</button>
       <button type='button' className='nextCard'onClick={updateNextCardsNum}>→</button>
       <button className='reset-button' onClick={resetFlashCard}>↻</button>
+      <button type='button' className='shuffle-Btn' onClick={handleShuffle}>Shuffle Cards</button>
     </div>
   )
 }
