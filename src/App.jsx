@@ -14,8 +14,21 @@ const App = () => {
     setCurrentStreak(currentStreak + 1);
   };
 
-  const handleShuffle = () => { // A function to deal with shuffling the card collection.
+  const shuffleArray = (array) => {
+      if (array.length <= 1) return array; // If only one card, return as-is
+    const [firstCard, ...restCards] = array; // Separate the first card from the rest
+    for (let i = restCards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [restCards[i], restCards[j]] = [restCards[j], restCards[i]]; // Swap elements
+    }
+    return [firstCard, ...restCards]; // Keep the first card at index 0
+  };
 
+  const handleShuffle = () => {
+     // A function to deal with shuffling the card collection.
+    console.log("Shuffling Function is running");
+    setTriviaGame((prev) => shuffleArray(prev));
+    setNumCard(1);
   }
   const getSimilarity = (str1, str2) => { //Find common words between the user input and the answer by trimming unecessary words. 
     const words1 = str1.toLowerCase().split(/\s+/);
@@ -80,7 +93,7 @@ const getNextCard = () => {
   }
 
 
-  const triviaGame = [
+  const [triviaGame, setTriviaGame] = useState([
     {
       "question" : "Welcome to the most exciting Data Structure and Algorithm Quiz",
       "answer" : "Hit the arrow button to start!",
@@ -136,7 +149,7 @@ const getNextCard = () => {
       "answer": "Recursion is a technique where a function calls itself to solve smaller instances of the same problem.",
       "id": "easy"
     }
-];
+]);
 
   
   return ( 
@@ -172,7 +185,7 @@ const getNextCard = () => {
       <button type='button' className='previousCard'onClick={updatePrevCardsNum}>⭠</button>
       <button type='button' className='nextCard'onClick={updateNextCardsNum}>→</button>
       <button className='reset-button' onClick={resetFlashCard}>↻</button>
-      <button type='button' className='shuffle-Btn' onClick={handleShuffle}>Shuffle Cards</button>
+      <button type='shuffle' className='shuffle-Btn' onClick={handleShuffle}>Shuffle Cards</button>
     </div>
   )
 }
