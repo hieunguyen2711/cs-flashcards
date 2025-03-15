@@ -3,27 +3,67 @@ import { useState } from 'react';
 import GameCard from './components/GameCard';
 
 const App = () => {
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [inputs, setInputs] = useState('')
+  const [currentStreak, setCurrentStreak] = useState(0);//A state to store the user's correct streak.
+  const [inputs, setInputs] = useState({ //A state to store the user's input.
+    'answer': '',
+  });
+  const [trueAnswer, setTrueAnswer] = useState({}); //A state to store the correct answer.
+  const [correct_answer, setCorrectAnswer] = useState('');// A state to store the id of wrong and correct answer for later styling.
 
-  const handleStreak = () => {
+  const handleStreak = () => { //A function that counts the user's correct answer streak.
     setCurrentStreak(currentStreak + 1);
   };
 
-  const handleShuffle = () => {
+  const handleShuffle = () => { // A function to deal with shuffling the card collection.
 
   }
-  const checkAnswer = () => {
+  const getSimilarity = (str1, str2) => { //Find common words between the user input and the answer by trimming unecessary words. 
+    const words1 = str1.toLowerCase().split(/\s+/);
+    const words2 = str2.toLowerCase().split(/\s+/);
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+    const intersection = new Set([...set1].filter(word => set2.has(word)));
+    const similarity = intersection.size / Math.max(set1.size, set2.size);
+    return similarity;
+  }
+  const checkAnswer = (e) => {//A function to check the user's answer by finding the common words betwwen the input and the correct answer. 
+                              // The result will be correct if the user has 70% of the real answer correctly. 
+    e.preventDefault();
+    const userInput = inputs.answer.trim();
+    const correctAnswer = trueAnswer.trim();
+    const similarityScore = getSimilarity(userInput, correctAnswer);
+    console.log("Check answer function is run");
+    if (similarityScore >= 0.5) {
+      setCorrectAnswer('correct');
+      handleStreak();
+      console.log(inputs['answer']);
+      
+    } else {
+      setCorrectAnswer('wrong');
+      console.log("wrong");
+    
+    }
+    setInputs({'answer': ''});
+    console.log(inputs);
 
+    
   }
 
   let [numCard, setNumCard] = useState(1);
   
-
+const getNextCard = () => {
+  const nextAnswer = triviaGame[numCard].answer;
+  setTrueAnswer(nextAnswer);
+  setCorrectAnswer('');
+  console.log(nextAnswer);
+}
 
   const updateNextCardsNum = () => {
     if (numCard <= 10) {
+      getNextCard();
       setNumCard(numCard + 1);
+      setCorrectAnswer('');
+      
     }
   }
   const updatePrevCardsNum = () => {
@@ -34,6 +74,9 @@ const App = () => {
 
   const resetFlashCard = () => {
     setNumCard(numCard = 1);
+    setCorrectAnswer('');
+    setInputs({'answer': ''});
+
   }
 
 
@@ -112,13 +155,18 @@ const App = () => {
       )}
       <form className='container'>
         <div className='mini-container'>
-          Guess the answer here: 
-          <input type='text' name='answer' placeholder='Place your answer here...' onChange={(e) => setInputs((prevState) => ({
-            ...prevState,
-            [e.target.name]: e.target.value,
-          }))}>
-          </input>
-          <button type='submit' className='submit-Btn' onClick={checkAnswer}>Submit Guess</button>
+           
+          <div className='answer-space' id={correct_answer}>
+          Guess the answer here:
+            <input type='text' name='answer' value={inputs.answer} placeholder='Place your answer here...' onChange={(e) => setInputs((prevState) => ({
+              ...prevState,
+              [e.target.name]: e.target.value,
+            }))}>
+            </input>
+            <button type='submit' className='submit-Btn' onClick={checkAnswer}>Submit Guess</button>
+          </div>
+          
+          
         </div>
       </form>
       <button type='button' className='previousCard'onClick={updatePrevCardsNum}>⭠</button>

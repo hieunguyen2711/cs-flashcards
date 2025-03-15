@@ -116,5 +116,26 @@ button {
 #medium {
   background-color: rgb(243, 255, 109);
 }
+#wrong {
+  background-color: #f8d7da; /* Light red */
+  border: 2px solid #dc3545; /* Red border */
+  color: #721c24; /* Dark red text */
+}
+#correct {
+  background-color: #d4edda; /* Light green */
+  border: 2px solid #28a745; /* Green border */
+  color: #155724; /* Dark green text */
+}
 
+#hard {
+  background-color: green;
+}
+input {
+  padding: 10px;
+  margin: 5px;
+}
+
+.submit-Btn {
+  transition: background-color 0.2s ease-in-out;
+}
 
