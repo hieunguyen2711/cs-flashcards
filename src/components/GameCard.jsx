@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 
-const GameCard = (props) => {
+const GameCard = ({question, answer, isFlipped, onFlip, level}) => {
     
-    const [isFlipped, setisFlipped] = useState(false);
-    const handleCardClick = () => {
-        setisFlipped(!isFlipped);
-    }
+    
 
     return (
         <div>
-            <div className={`card ${isFlipped ? "flipped": ""}`} onClick={handleCardClick} id={props.level}>
-                    <div className="front" >{props.question}</div>
+            <div className={`card ${isFlipped ? "flipped": ""}`} onClick={onFlip} id={level}>
+                    <div className="front" >{question}</div>
                     <br/>
-                    <div className="back" >{props.answer} </div>                                       
+                    <div className="back" >{answer} </div>                                       
             </div>
         </div>
         

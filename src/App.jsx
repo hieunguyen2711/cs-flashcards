@@ -3,6 +3,10 @@ import { useState } from 'react';
 import GameCard from './components/GameCard';
 
 const App = () => {
+  const [isFlipped, setisFlipped] = useState(false);
+    const handleCardClick = () => {
+        setisFlipped(!isFlipped);
+    }
   const [currentStreak, setCurrentStreak] = useState(0);//A state to store the user's correct streak.
   const [inputs, setInputs] = useState({ //A state to store the user's input.
     'answer': '',
@@ -45,21 +49,21 @@ const App = () => {
     const userInput = inputs.answer.trim();
     const correctAnswer = trueAnswer.trim();
     const similarityScore = getSimilarity(userInput, correctAnswer);
-    console.log("Check answer function is run");
-    if (similarityScore >= 0.5) {
-      setCorrectAnswer('correct');
-      handleStreak();
-      console.log(inputs['answer']);
-      
+    if (isFlipped) {
+      alert("You can't answer while the answer card is flipped");
     } else {
-      setCorrectAnswer('wrong');
-      console.log("wrong");
-    
+      if (similarityScore >= 0.5) {
+        setCorrectAnswer('correct');
+        handleStreak();
+        console.log(inputs['answer']);
+        
+      } else {
+        setCorrectAnswer('wrong');
+        console.log("wrong");
+      
+      }
+      setInputs({'answer': ''});
     }
-    setInputs({'answer': ''});
-    console.log(inputs);
-
-    
   }
 
   let [numCard, setNumCard] = useState(1);
@@ -162,7 +166,7 @@ const getNextCard = () => {
     
       <br/>
       {numCard <= triviaGame.length  && numCard >= 1 ? (
-        <GameCard key={numCard} question={triviaGame[numCard - 1].question} answer= {triviaGame[numCard - 1].answer} level={triviaGame[numCard - 1].id}/>
+        <GameCard key={numCard} question={triviaGame[numCard - 1].question} answer= {triviaGame[numCard - 1].answer} level={triviaGame[numCard - 1].id} isFlipped={isFlipped} onFlip={handleCardClick}/>
       ): (
         <p>No more cards left!!</p>
       )}
