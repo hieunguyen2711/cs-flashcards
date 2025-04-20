@@ -10,7 +10,7 @@ const App = () => {
     'question': '',
     'level': 'easy'
   });
-  const [trueAnswer, setTrueAnswer] = useState({});
+  const [trueAnswer, setTrueAnswer] = useState('');
   const [correct_answer, setCorrectAnswer] = useState('');
   const [triviaGame, setTriviaGame] = useState([]);
   const [numCard, setNumCard] = useState(0);
@@ -21,6 +21,13 @@ const App = () => {
   useEffect(() => {
     fetchFlashcards();
   }, []);
+
+  // Set initial answer when flashcards are loaded
+  useEffect(() => {
+    if (triviaGame.length > 0) {
+      setTrueAnswer(triviaGame[0].answer);
+    }
+  }, [triviaGame]);
 
   const fetchFlashcards = async () => {
     try {
@@ -37,10 +44,12 @@ const App = () => {
   };
 
   const handleStreak = () => {
-    setCurrentStreak(currentStreak + 1);
+    setCurrentStreak(prev => prev + 1);
   };
 
   const getSimilarity = (str1, str2) => {
+    if (!str1 || !str2) return 0;
+    
     const words1 = str1.toLowerCase().split(/\s+/);
     const words2 = str2.toLowerCase().split(/\s+/);
     const set1 = new Set(words1);
@@ -50,29 +59,9 @@ const App = () => {
     return similarity;
   };
 
-  const checkAnswer = (e) => {
-    e.preventDefault();
-    const userInput = inputs.answer.trim();
-    const correctAnswer = trueAnswer.trim();
-    const similarityScore = getSimilarity(userInput, correctAnswer);
-    
-    if (isFlipped) {
-      alert("You can't answer while the answer card is flipped");
-    } else {
-      if (similarityScore >= 0.5) {
-        setCorrectAnswer('correct');
-        handleStreak();
-      } else {
-        setCorrectAnswer('wrong');
-        setCurrentStreak(0);
-      }
-      setInputs(prev => ({ ...prev, answer: '' }));
-    }
-  };
-
   const getNextCard = () => {
-    if (triviaGame.length > 0) {
-      const nextAnswer = triviaGame[numCard]?.answer;
+    if (triviaGame.length > 0 && numCard < triviaGame.length) {
+      const nextAnswer = triviaGame[numCard].answer;
       setTrueAnswer(nextAnswer);
       setCorrectAnswer('');
     }
@@ -80,8 +69,12 @@ const App = () => {
 
   const updateNextCardsNum = () => {
     if (numCard < triviaGame.length - 1) {
-      setNumCard(numCard + 1);
-      getNextCard();
+      setNumCard(prev => {
+        const newNum = prev + 1;
+        // Update trueAnswer for the next card
+        setTrueAnswer(triviaGame[newNum].answer);
+        return newNum;
+      });
       setCorrectAnswer('');
     } else {
       alert("You've reached the last card!");
@@ -90,8 +83,12 @@ const App = () => {
 
   const updatePrevCardsNum = () => {
     if (numCard > 0) {
-      setNumCard(numCard - 1);
-      getNextCard();
+      setNumCard(prev => {
+        const newNum = prev - 1;
+        // Update trueAnswer for the previous card
+        setTrueAnswer(triviaGame[newNum].answer);
+        return newNum;
+      });
       setCorrectAnswer('');
     } else {
       alert("You're at the first card!");
@@ -103,6 +100,10 @@ const App = () => {
     setCorrectAnswer('');
     setInputs({ answer: '', question: '', level: 'easy' });
     setCurrentStreak(0);
+    // Reset to first card's answer
+    if (triviaGame.length > 0) {
+      setTrueAnswer(triviaGame[0].answer);
+    }
   };
 
   const handleCreateFlashcard = async (e) => {
@@ -188,6 +189,76 @@ const App = () => {
       answer: card.answer,
       level: card.level
     });
+  };
+
+  const checkAnswer = (e) => {
+    e.preventDefault();
+    const userInput = inputs.answer.trim();
+    const correctAnswer = trueAnswer.trim();
+    
+    // Debug logging
+    console.log('User Input:', userInput);
+    console.log('Correct Answer:', correctAnswer);
+    console.log('Current Card Index:', numCard);
+    
+    // Validate input
+    if (!userInput) {
+      alert('Please enter an answer');
+      return;
+    }
+
+    if (isFlipped) {
+      alert("You can't answer while the answer card is flipped");
+      return;
+    }
+
+    // Normalize both answers for comparison
+    const normalizedUserInput = userInput.toLowerCase().replace(/\s+/g, ' ');
+    const normalizedCorrectAnswer = correctAnswer.toLowerCase().replace(/\s+/g, ' ');
+    
+    // Calculate similarity score
+    const similarityScore = getSimilarity(normalizedUserInput, normalizedCorrectAnswer);
+    
+    // Debug logging
+    console.log('Similarity Score:', similarityScore);
+    
+    // Check for exact match first
+    if (normalizedUserInput === normalizedCorrectAnswer) {
+      console.log('Exact match!');
+      setCorrectAnswer('correct');
+      handleStreak();
+      setTimeout(() => {
+        setCorrectAnswer('');
+        updateNextCardsNum();
+      }, 1500);
+    } 
+    // Check for high similarity (reduced threshold to 0.4)
+    else if (similarityScore >= 0.4) {
+      console.log('High similarity match!');
+      setCorrectAnswer('correct');
+      handleStreak();
+      setTimeout(() => {
+        setCorrectAnswer('');
+        updateNextCardsNum();
+      }, 1500);
+    } 
+    // Check for partial match (at least 30% similar)
+    else if (similarityScore >= 0.3) {
+      console.log('Partial match!');
+      setCorrectAnswer('partial');
+      setCurrentStreak(0);
+      setTimeout(() => setCorrectAnswer(''), 1500);
+    } 
+    // No match
+    else {
+      console.log('No match!');
+      setCorrectAnswer('wrong');
+      setCurrentStreak(0);
+      setTimeout(() => setCorrectAnswer(''), 1500);
+    }
+    
+    // Clear input
+    setInputs(prev => ({ ...prev, answer: '' }));
   };
 
   return (

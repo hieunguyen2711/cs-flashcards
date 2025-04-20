@@ -145,8 +145,29 @@ body h4 {
   padding: 1rem;
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.9);
-  animation: fadeIn 0.5s ease-out;
   transition: all 0.3s ease;
+  margin: 1rem 0;
+}
+
+.answer-space#correct {
+  background-color: #4CAF50;
+  color: white;
+  animation: successPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.answer-space#wrong {
+  background-color: #f44336;
+  color: white;
+  animation: errorShake 0.5s cubic-bezier(0.36, 0, 0.66, -0.56);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+.answer-space#partial {
+  background-color: #FFA500;
+  color: white;
+  animation: pulse 1s ease-in-out;
+  box-shadow: 0 4px 8px rgba(255, 165, 0, 0.3);
 }
 
 input, select {
@@ -307,7 +328,7 @@ button:active {
 /* Loading state animations */
 @keyframes pulse {
   0% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.8; }
   100% { opacity: 1; }
 }
 
