@@ -13,7 +13,7 @@ const App = () => {
   const [trueAnswer, setTrueAnswer] = useState({});
   const [correct_answer, setCorrectAnswer] = useState('');
   const [triviaGame, setTriviaGame] = useState([]);
-  const [numCard, setNumCard] = useState(1);
+  const [numCard, setNumCard] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -64,6 +64,7 @@ const App = () => {
         handleStreak();
       } else {
         setCorrectAnswer('wrong');
+        setCurrentStreak(0);
       }
       setInputs(prev => ({ ...prev, answer: '' }));
     }
@@ -82,12 +83,18 @@ const App = () => {
       setNumCard(numCard + 1);
       getNextCard();
       setCorrectAnswer('');
+    } else {
+      alert("You've reached the last card!");
     }
   };
 
   const updatePrevCardsNum = () => {
     if (numCard > 0) {
       setNumCard(numCard - 1);
+      getNextCard();
+      setCorrectAnswer('');
+    } else {
+      alert("You're at the first card!");
     }
   };
 
@@ -95,6 +102,7 @@ const App = () => {
     setNumCard(0);
     setCorrectAnswer('');
     setInputs({ answer: '', question: '', level: 'easy' });
+    setCurrentStreak(0);
   };
 
   const handleCreateFlashcard = async (e) => {

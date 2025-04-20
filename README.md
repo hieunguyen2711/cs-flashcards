@@ -1,36 +1,36 @@
-# Web Development Project 2 - DSA Flashcards
+# Web Development Project 3 - *CS Flashcards Quiz*
 
-Submitted by: Hieu Nguyen
+Submitted by: **Hieu Nguyen**
 
-This web app: shows 10 most important knowledge about Computer Science's DSA (Data Structure and Algorithm)
+This web app: **allows user inputs to check with the card's answer. If the user answers around 50% of the true answer, it will be marked correct**
 
-Time spent: 10 hours spent in total
+Time spent: **7** hours spent in total
 
 ## Required Features
 
 The following **required** functionality is completed:
 
-- [x] **The title of the card set and some information about it, such as a short description and the total number of cards are displayed**
-- [x] **A single card at a time is displayed, only showing one of the components of the information pair**
-- [x] **A list of card pairs is created**
-- [x] **Clicking on the card shows the corresponding component of the information pair**
-- [x] **Clicking the next button displays a random new card**
+- [x] **The user can enter their guess in a box before seeing the flipside of the card**
+- [x] **Clicking on a submit button shows visual feedback about whether the answer was correct or incorrect**
+- [x] **A back button is displayed on the card and can be used to return to the previous card in a set sequence**
+- [x] **A next button is displayed on the card and can be used to navigate to the next card in a set sequence**
 
 The following **optional** features are implemented:
 
-- [ ] Cards contains images in addition to or in place of text
-- [x] Cards have different visual styles such as color based on their category
-  - [x] *visual style implemented*
+- [x] A shuffle button is used to randomize the order of the cards
+- [x] A user's answer may be counted as correct even when it is slightly different from the target answer
+- [x] A counter displays the user's current and longest streak of correct responses
+- [x] A user can mark a card that they have mastered and have it removed from the pool of answers as well as added to a list of mastered cards
 
 The following **additional** features are implemented:
 
-* [x] Included a reset button to go back to the first card
+* [ ] List anything else that you added to improve the site's functionality!
 
 ## Video Walkthrough
 
-Here's a walkthrough of implemented required features:
+Here's a walkthrough of implemented user stories:
 
-<img src='https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXM4aXJsOG85dWk0a2J4bWNoa2hwZWNkY3F5ejJjNWg1a2hlYXI0aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jWHaaIf9vzp0PsLq5k/giphy.gif' title='DSA Flashcard Video Walkthrough' width='' alt='DSA Flashcards Video Walkthrough' />
+<img src='https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTA0aHVscjYzNzJqZ3QwZHRrM204Mm1zejNrdmJ2eDd5M204Nzl2aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Dca7A5A9c9pIcQzlyR/giphy.gif' title='DSA Flashcards Part 2' width='' alt='DSA Flashcards Part 2' />
 
 <!-- Replace this with whatever GIF tool you used! -->
 GIF created with ScreenToGif  
@@ -42,11 +42,11 @@ GIF created with ScreenToGif
 ## Notes
 
 Describe any challenges encountered while building the app.
-- The challenge I faced during the time working on this project is that I found it confusing to hide the "back" card in the back so it does not appear until the user click for the first time. 
+I am challenged with React's state and how to use them with objects
 
 ## License
 
-    Copyright 2025 Hieu The Nguyen
+    Copyright [2025] [Hieu Nguyen]
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
