@@ -7,9 +7,11 @@ const PORT = process.env.PORT || 3001;
 
 // Configure CORS for production
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://your-frontend-domain.com']  // Replace with your frontend domain
-    : ['http://localhost:3000', 'http://localhost:5173'],
+  origin: [
+    'http://localhost:3000', // Local development
+    'dazzling-gelato-42fe72.netlify.app', // Your Netlify domain
+    'https://*.netlify.app' // All Netlify subdomains
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };

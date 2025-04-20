@@ -1,51 +1,49 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import GameCard from './components/GameCard';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const App = () => {
-  const [isFlipped, setisFlipped] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [inputs, setInputs] = useState({
-    'answer': '',
-    'question': '',
-    'level': 'easy'
+    answer: '',
+    question: '',
+    level: 'easy'
   });
-  const [trueAnswer, setTrueAnswer] = useState('');
-  const [correct_answer, setCorrectAnswer] = useState('');
   const [triviaGame, setTriviaGame] = useState([]);
   const [numCard, setNumCard] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [feedback, setFeedback] = useState('');
 
-  // Fetch flashcards from backend
+  // Fetch flashcards from Supabase
   useEffect(() => {
     fetchFlashcards();
   }, []);
 
-  // Set initial answer when flashcards are loaded
-  useEffect(() => {
-    if (triviaGame.length > 0) {
-      setTrueAnswer(triviaGame[0].answer);
-      setNumCard(0); // Reset to first card
-    }
-  }, [triviaGame]);
-
   const fetchFlashcards = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/flashcards');
-      if (!response.ok) {
-        throw new Error('Failed to fetch flashcards');
-      }
-      const data = await response.json();
+      const { data, error } = await supabase
+        .from('vietnamese-db')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
       setTriviaGame(data);
     } catch (error) {
       console.error('Error fetching flashcards:', error);
-      alert('Failed to load flashcards. Please try again later.');
+      alert(`Failed to load flashcards: ${error.message}`);
     }
   };
 
   const handleCardClick = () => {
-    setisFlipped(!isFlipped);
+    setIsFlipped(!isFlipped);
   };
 
   const handleStreak = () => {
@@ -55,7 +53,6 @@ const App = () => {
   const getSimilarity = (str1, str2) => {
     if (!str1 || !str2) return 0;
     
-    // Remove punctuation and extra spaces
     const cleanStr1 = str1.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').replace(/\s+/g, ' ').trim();
     const cleanStr2 = str2.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').replace(/\s+/g, ' ').trim();
     
@@ -64,64 +61,29 @@ const App = () => {
     const set1 = new Set(words1);
     const set2 = new Set(words2);
     const intersection = new Set([...set1].filter(word => set2.has(word)));
-    const similarity = intersection.size / Math.max(set1.size, set2.size);
-    return similarity;
-  };
-
-  const getNextCard = () => {
-    if (triviaGame.length > 0 && numCard < triviaGame.length) {
-      const nextAnswer = triviaGame[numCard].answer;
-      setTrueAnswer(nextAnswer);
-      setCorrectAnswer('');
-    }
+    return intersection.size / Math.max(set1.size, set2.size);
   };
 
   const updateNextCardsNum = () => {
-    if (triviaGame.length === 0) {
-      console.error('No cards available');
-      return;
-    }
-
+    if (triviaGame.length === 0) return;
     if (numCard < triviaGame.length - 1) {
-      const nextNum = numCard + 1;
-      setNumCard(nextNum);
-      setTrueAnswer(triviaGame[nextNum].answer);
-      setCorrectAnswer('');
-      setisFlipped(false);
-    } else {
-      alert("You've reached the last card!");
+      setNumCard(prev => prev + 1);
+      setIsFlipped(false);
     }
   };
 
   const updatePrevCardsNum = () => {
-    if (triviaGame.length === 0) {
-      console.error('No cards available');
-      return;
-    }
-
+    if (triviaGame.length === 0) return;
     if (numCard > 0) {
-      const prevNum = numCard - 1;
-      setNumCard(prevNum);
-      setTrueAnswer(triviaGame[prevNum].answer);
-      setCorrectAnswer('');
-      setisFlipped(false);
-    } else {
-      alert("You're at the first card!");
+      setNumCard(prev => prev - 1);
+      setIsFlipped(false);
     }
   };
 
   const resetFlashCard = () => {
-    if (triviaGame.length === 0) {
-      console.error('No cards available');
-      return;
-    }
-
     setNumCard(0);
-    setCorrectAnswer('');
-    setInputs({ answer: '', question: '', level: 'easy' });
     setCurrentStreak(0);
-    setisFlipped(false);
-    setTrueAnswer(triviaGame[0].answer);
+    setIsFlipped(false);
   };
 
   const handleCreateFlashcard = async (e) => {
@@ -132,28 +94,22 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/flashcards', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { error } = await supabase
+        .from('vietnamese-db')
+        .insert([{
           question: inputs.question.trim(),
           answer: inputs.answer.trim(),
           level: inputs.level
-        }),
-      });
+        }]);
+
+      if (error) throw error;
       
-      if (response.ok) {
-        await fetchFlashcards();
-        setInputs({ answer: '', question: '', level: 'easy' });
-        alert('New flashcard created successfully!');
-      } else {
-        throw new Error('Failed to create flashcard');
-      }
+      await fetchFlashcards();
+      setInputs({ answer: '', question: '', level: 'easy' });
+      alert('New flashcard created successfully!');
     } catch (error) {
       console.error('Error creating flashcard:', error);
-      alert('Failed to create flashcard. Please try again.');
+      alert(`Failed to create flashcard: ${error.message}`);
     }
   };
 
@@ -165,57 +121,48 @@ const App = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/flashcards/${editingId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { error } = await supabase
+        .from('vietnamese-db')
+        .update({
           question: inputs.question.trim(),
           answer: inputs.answer.trim(),
           level: inputs.level
-        }),
-      });
+        })
+        .eq('id', editingId);
+
+      if (error) throw error;
       
-      if (response.ok) {
-        await fetchFlashcards();
-        setIsEditing(false);
-        setEditingId(null);
-        setInputs({ answer: '', question: '', level: 'easy' });
-        alert('Flashcard updated successfully!');
-      } else {
-        throw new Error('Failed to update flashcard');
-      }
+      await fetchFlashcards();
+      setIsEditing(false);
+      setEditingId(null);
+      setInputs({ answer: '', question: '', level: 'easy' });
+      alert('Flashcard updated successfully!');
     } catch (error) {
       console.error('Error updating flashcard:', error);
-      alert('Failed to update flashcard. Please try again.');
+      alert(`Failed to update flashcard: ${error.message}`);
     }
   };
 
   const handleDeleteFlashcard = async (id) => {
-    if (!id) {
-      console.error('No flashcard ID provided for deletion');
-      return;
-    }
+    if (!id) return;
 
     if (window.confirm('Are you sure you want to delete this flashcard?')) {
       try {
-        const response = await fetch(`http://localhost:3001/api/flashcards/${id}`, {
-          method: 'DELETE',
-        });
+        const { error } = await supabase
+          .from('vietnamese-db')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
         
-        if (response.ok) {
-          await fetchFlashcards();
-          if (numCard >= triviaGame.length - 1) {
-            setNumCard(Math.max(0, triviaGame.length - 2));
-          }
-          alert('Flashcard deleted successfully!');
-        } else {
-          throw new Error('Failed to delete flashcard');
+        await fetchFlashcards();
+        if (numCard >= triviaGame.length - 1) {
+          setNumCard(Math.max(0, triviaGame.length - 2));
         }
+        alert('Flashcard deleted successfully!');
       } catch (error) {
         console.error('Error deleting flashcard:', error);
-        alert('Failed to delete flashcard. Please try again.');
+        alert(`Failed to delete flashcard: ${error.message}`);
       }
     }
   };
@@ -233,14 +180,8 @@ const App = () => {
   const checkAnswer = (e) => {
     e.preventDefault();
     const userInput = inputs.answer.trim();
-    const correctAnswer = trueAnswer.trim();
+    const correctAnswer = triviaGame[numCard]?.answer.trim();
     
-    // Debug logging
-    console.log('User Input:', userInput);
-    console.log('Correct Answer:', correctAnswer);
-    console.log('Current Card Index:', numCard);
-    
-    // Validate input
     if (!userInput) {
       alert('Please enter an answer');
       return;
@@ -256,52 +197,21 @@ const App = () => {
       return;
     }
 
-    // Normalize both answers for comparison
-    const normalizedUserInput = userInput.toLowerCase().replace(/\s+/g, ' ');
-    const normalizedCorrectAnswer = correctAnswer.toLowerCase().replace(/\s+/g, ' ');
+    const similarityScore = getSimilarity(userInput, correctAnswer);
     
-    // Calculate similarity score
-    const similarityScore = getSimilarity(normalizedUserInput, normalizedCorrectAnswer);
-    
-    // Debug logging
-    console.log('Similarity Score:', similarityScore);
-    
-    // Check for exact match first
-    if (normalizedUserInput === normalizedCorrectAnswer) {
-      console.log('Exact match!');
-      setCorrectAnswer('correct');
+    if (similarityScore >= 0.4) {
+      setFeedback('correct');
       handleStreak();
       setTimeout(() => {
-        setCorrectAnswer('');
+        setFeedback('');
         updateNextCardsNum();
       }, 1500);
-    } 
-    // Check for high similarity (reduced threshold to 0.4)
-    else if (similarityScore >= 0.4) {
-      console.log('High similarity match!');
-      setCorrectAnswer('correct');
-      handleStreak();
-      setTimeout(() => {
-        setCorrectAnswer('');
-        updateNextCardsNum();
-      }, 1500);
-    } 
-    // Check for partial match (at least 30% similar)
-    else if (similarityScore >= 0.3) {
-      console.log('Partial match!');
-      setCorrectAnswer('partial');
+    } else {
+      setFeedback('wrong');
       setCurrentStreak(0);
-      setTimeout(() => setCorrectAnswer(''), 1500);
-    } 
-    // No match
-    else {
-      console.log('No match!');
-      setCorrectAnswer('wrong');
-      setCurrentStreak(0);
-      setTimeout(() => setCorrectAnswer(''), 1500);
+      setTimeout(() => setFeedback(''), 1500);
     }
     
-    // Clear input
     setInputs(prev => ({ ...prev, answer: '' }));
   };
 
@@ -330,7 +240,7 @@ const App = () => {
 
               <form className='container'>
                 <div className='mini-container'>
-                  <div className='answer-space' id={correct_answer}>
+                  <div className={`answer-space ${feedback}`}>
                     Guess the answer here:
                     <input
                       type='text'

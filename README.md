@@ -1,263 +1,110 @@
-# Vietnamese Learning Flashcard - Interactive Learning Platform
+# CS Flashcard App
 
-A modern, interactive flashcard application designed to help users learn and test their knowledge of Computer Science concepts, particularly focusing on Data Structures and Algorithms.
+A modern, interactive flashcard application for learning Computer Science concepts, built with React and Supabase.
 
-## 🚀 Features
+## Features
 
-- **Interactive Flashcards**: Flip cards to reveal answers and test your knowledge
-- **Smart Answer Checking**: Advanced text comparison algorithm that accepts similar answers
-- **Progress Tracking**: Keep track of your learning streak and progress
-- **Card Management**: Create, edit, and delete flashcards with ease
-- **Difficulty Levels**: Organize cards by difficulty (Easy, Medium, Hard)
-- **Responsive Design**: Optimized for both desktop and mobile devices
-- **Smooth Animations**: Engaging UI with smooth transitions and feedback
-- **Real-time Feedback**: Immediate feedback on answers with visual indicators
+- 🎴 Interactive flashcard system
+- 📝 Create, edit, and delete flashcards
+- 🔄 Card flipping animation
+- 📊 Track your answer streak
+- 🎯 Smart answer checking with similarity scoring
+- 📱 Responsive design for all devices
+- 🔒 Secure data storage with Supabase
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-### Frontend
-- **React.js**: Modern UI framework for building interactive user interfaces
-- **CSS3**: Styled components with animations and responsive design
-- **JavaScript (ES6+)**: Modern JavaScript features and async/await for API calls
+- **Frontend**: React.js
+- **Database**: Supabase (PostgreSQL)
+- **Styling**: CSS3 with animations
+- **Deployment**: Netlify
 
-### Backend
-- **Node.js**: JavaScript runtime environment
-- **Express.js**: Web application framework for building RESTful APIs
-- **MySQL**: Relational database for storing flashcard data
-- **Sequelize**: ORM for database management
+## Getting Started
 
-### Development Tools
-- **Git**: Version control
-- **npm**: Package management
-- **MySQL Workbench**: Database management and visualization
+### Prerequisites
 
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
 - Node.js (v14 or higher)
-- MySQL Server
-- npm (Node Package Manager)
-- Git
+- npm or yarn
+- Supabase account
 
-## 🛠️ Installation
+### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/hieunguyen2711/cs-flashcard.git
-   cd cs-flashcard
-   ```
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/cs-flashcard.git
+cd cs-flashcard
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+2. Install dependencies:
+```bash
+npm install
+```
 
-3. **Set up the database**
-   - Create a MySQL database
-   - Update the `.env` file with your database credentials:
-     ```
-     DB_HOST=localhost
-     DB_USER=your_username
-     DB_PASSWORD=your_password
-     DB_NAME=your_database_name
-     ```
+3. Create a `.env` file in the root directory:
+```env
+REACT_APP_SUPABASE_URL=your-supabase-url
+REACT_APP_SUPABASE_KEY=your-supabase-key
+```
 
-4. **Start the development server**
-   ```bash
-   npm start
-   ```
+4. Start the development server:
+```bash
+npm start
+```
 
-## 🎮 Usage
+The app will be available at `http://localhost:3000`
 
-1. **Creating Flashcards**
-   - Click on "Create New Flashcard"
-   - Enter the question and answer
-   - Select the difficulty level
-   - Click "Create Flashcard"
+## Usage
 
-2. **Studying Flashcards**
-   - View the question on the front of the card
-   - Try to answer in your mind
-   - Click the card to flip and see the answer
-   - Type your answer in the input field
-   - Get immediate feedback on your response
+### Creating Flashcards
+1. Enter a question in the "Enter question" field
+2. Enter the answer in the "Enter answer" field
+3. Select the difficulty level (Easy, Medium, Hard)
+4. Click "Create Flashcard"
 
-3. **Managing Flashcards**
-   - Edit existing cards using the "Edit Current Card" button
-   - Delete cards using the "Delete Current Card" button
-   - Navigate between cards using the arrow buttons
-   - Reset your progress using the reset button
+### Playing with Flashcards
+1. Click on a flashcard to flip it and see the answer
+2. Type your answer in the input field
+3. Click "Submit Guess" to check your answer
+4. Use the navigation buttons (⭠ →) to move between cards
+5. Click "↻" to reset to the first card
 
-## 🎨 UI/UX Features
+### Managing Flashcards
+- Edit: Click "Edit Current Card" to modify a flashcard
+- Delete: Click "Delete Current Card" to remove a flashcard
+- Create: Use the form at the bottom to add new flashcards
 
-- **Card Flip Animation**: Smooth 3D flip effect
-- **Answer Feedback**: Visual indicators for correct/incorrect answers
-- **Streak Counter**: Track your consecutive correct answers
-- **Mobile Responsive**: Optimized layout for all screen sizes
-- **Touch Feedback**: Enhanced mobile interactions
-- **Loading States**: Visual feedback during operations
-- **Error Handling**: User-friendly error messages
+## Database Structure
 
-## 🤝 Contributing
+The application uses a Supabase table named `vietnamese-db` with the following structure:
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```sql
+create table public.vietnamese-db (
+  id uuid default uuid_generate_v4() primary key,
+  question text not null,
+  answer text not null,
+  level text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+```
 
-## 📝 License
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- Thanks to all contributors who have helped improve this project
-- Inspired by spaced repetition learning techniques
-- Built with ❤️ for the CS learning community
+- [React](https://reactjs.org/) - The JavaScript library used
+- [Supabase](https://supabase.io/) - The backend service
+- [Netlify](https://www.netlify.com/) - The deployment platform
 
-## 🚀 Deployment Guide
+## Support
 
-### Prerequisites for Deployment
-- Google Cloud Platform account
-- Google Cloud SDK installed
-- MySQL instance (Cloud SQL recommended)
-- Domain name (optional)
-
-### 1. Prepare Your Application
-
-1. **Build your React application**
-   ```bash
-   npm run build
-   ```
-
-2. **Update environment variables**
-   Create a `.env.production` file with your production credentials:
-   ```
-   DB_HOST=your_cloud_sql_instance_ip
-   DB_USER=your_database_user
-   DB_PASSWORD=your_database_password
-   DB_NAME=your_database_name
-   NODE_ENV=production
-   ```
-
-### 2. Set Up Google Cloud Platform
-
-1. **Create a new project**
-   ```bash
-   gcloud projects create your-project-id
-   gcloud config set project your-project-id
-   ```
-
-2. **Enable required APIs**
-   ```bash
-   gcloud services enable compute.googleapis.com
-   gcloud services enable sqladmin.googleapis.com
-   ```
-
-3. **Create a Cloud SQL instance**
-   ```bash
-   gcloud sql instances create your-instance-name \
-     --database-version=MYSQL_8_0 \
-     --tier=db-f1-micro \
-     --region=us-central1
-   ```
-
-4. **Create a database and user**
-   ```bash
-   gcloud sql databases create your-database-name --instance=your-instance-name
-   gcloud sql users create your-username --instance=your-instance-name --password=your-password
-   ```
-
-### 3. Deploy to Google Cloud Run
-
-1. **Create a Dockerfile**
-   ```dockerfile
-   FROM node:16-alpine
-   WORKDIR /app
-   COPY package*.json ./
-   RUN npm install
-   COPY . .
-   RUN npm run build
-   CMD ["node", "server.js"]
-   ```
-
-2. **Build and push the container**
-   ```bash
-   gcloud builds submit --tag gcr.io/your-project-id/cs-flashcard
-   ```
-
-3. **Deploy to Cloud Run**
-   ```bash
-   gcloud run deploy cs-flashcard \
-     --image gcr.io/your-project-id/cs-flashcard \
-     --platform managed \
-     --region us-central1 \
-     --allow-unauthenticated
-   ```
-
-### 4. Set Up Continuous Deployment (Optional)
-
-1. **Create a Cloud Build trigger**
-   ```bash
-   gcloud builds triggers create github \
-     --repo-name=your-repo-name \
-     --branch-pattern="^main$" \
-     --build-config=cloudbuild.yaml
-   ```
-
-2. **Create cloudbuild.yaml**
-   ```yaml
-   steps:
-   - name: 'gcr.io/cloud-builders/docker'
-     args: ['build', '-t', 'gcr.io/$PROJECT_ID/cs-flashcard', '.']
-   - name: 'gcr.io/cloud-builders/docker'
-     args: ['push', 'gcr.io/$PROJECT_ID/cs-flashcard']
-   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-     entrypoint: gcloud
-     args: ['run', 'deploy', 'cs-flashcard', '--image', 'gcr.io/$PROJECT_ID/cs-flashcard', '--region', 'us-central1', '--platform', 'managed']
-   ```
-
-### 5. Monitoring and Maintenance
-
-1. **Set up monitoring**
-   - Use Cloud Monitoring for performance metrics
-   - Set up alerts for errors and high latency
-   - Monitor database connections and query performance
-
-2. **Regular maintenance**
-   - Keep dependencies updated
-   - Monitor and optimize database performance
-   - Regular backups of your database
-   - Review and update security settings
-
-### 6. Security Considerations
-
-1. **Database Security**
-   - Use SSL for database connections
-   - Implement proper access controls
-   - Regular security audits
-
-2. **Application Security**
-   - Implement rate limiting
-   - Use proper CORS settings
-   - Regular security updates
-   - Input validation and sanitization
-
-3. **Environment Security**
-   - Use secret management for sensitive data
-   - Implement proper IAM roles
-   - Regular security scanning
-
-### 7. Scaling Considerations
-
-1. **Horizontal Scaling**
-   - Cloud Run automatically scales based on traffic
-   - Monitor and adjust concurrency settings
-   - Use connection pooling for database connections
-
-2. **Database Scaling**
-   - Monitor database performance
-   - Consider read replicas for high read traffic
-   - Implement proper indexing
-
-3. **Cost Optimization**
-   - Monitor resource usage
-   - Use appropriate instance sizes
-   - Implement caching where possible
+If you encounter any issues or have questions, please open an issue in the GitHub repository.
