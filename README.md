@@ -43,7 +43,7 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/cs-flashcard.git
+   git clone https://github.com/hieunguyen2711/cs-flashcard.git
    cd cs-flashcard
    ```
 
@@ -111,3 +111,153 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Thanks to all contributors who have helped improve this project
 - Inspired by spaced repetition learning techniques
 - Built with ❤️ for the CS learning community
+
+## 🚀 Deployment Guide
+
+### Prerequisites for Deployment
+- Google Cloud Platform account
+- Google Cloud SDK installed
+- MySQL instance (Cloud SQL recommended)
+- Domain name (optional)
+
+### 1. Prepare Your Application
+
+1. **Build your React application**
+   ```bash
+   npm run build
+   ```
+
+2. **Update environment variables**
+   Create a `.env.production` file with your production credentials:
+   ```
+   DB_HOST=your_cloud_sql_instance_ip
+   DB_USER=your_database_user
+   DB_PASSWORD=your_database_password
+   DB_NAME=your_database_name
+   NODE_ENV=production
+   ```
+
+### 2. Set Up Google Cloud Platform
+
+1. **Create a new project**
+   ```bash
+   gcloud projects create your-project-id
+   gcloud config set project your-project-id
+   ```
+
+2. **Enable required APIs**
+   ```bash
+   gcloud services enable compute.googleapis.com
+   gcloud services enable sqladmin.googleapis.com
+   ```
+
+3. **Create a Cloud SQL instance**
+   ```bash
+   gcloud sql instances create your-instance-name \
+     --database-version=MYSQL_8_0 \
+     --tier=db-f1-micro \
+     --region=us-central1
+   ```
+
+4. **Create a database and user**
+   ```bash
+   gcloud sql databases create your-database-name --instance=your-instance-name
+   gcloud sql users create your-username --instance=your-instance-name --password=your-password
+   ```
+
+### 3. Deploy to Google Cloud Run
+
+1. **Create a Dockerfile**
+   ```dockerfile
+   FROM node:16-alpine
+   WORKDIR /app
+   COPY package*.json ./
+   RUN npm install
+   COPY . .
+   RUN npm run build
+   CMD ["node", "server.js"]
+   ```
+
+2. **Build and push the container**
+   ```bash
+   gcloud builds submit --tag gcr.io/your-project-id/cs-flashcard
+   ```
+
+3. **Deploy to Cloud Run**
+   ```bash
+   gcloud run deploy cs-flashcard \
+     --image gcr.io/your-project-id/cs-flashcard \
+     --platform managed \
+     --region us-central1 \
+     --allow-unauthenticated
+   ```
+
+### 4. Set Up Continuous Deployment (Optional)
+
+1. **Create a Cloud Build trigger**
+   ```bash
+   gcloud builds triggers create github \
+     --repo-name=your-repo-name \
+     --branch-pattern="^main$" \
+     --build-config=cloudbuild.yaml
+   ```
+
+2. **Create cloudbuild.yaml**
+   ```yaml
+   steps:
+   - name: 'gcr.io/cloud-builders/docker'
+     args: ['build', '-t', 'gcr.io/$PROJECT_ID/cs-flashcard', '.']
+   - name: 'gcr.io/cloud-builders/docker'
+     args: ['push', 'gcr.io/$PROJECT_ID/cs-flashcard']
+   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+     entrypoint: gcloud
+     args: ['run', 'deploy', 'cs-flashcard', '--image', 'gcr.io/$PROJECT_ID/cs-flashcard', '--region', 'us-central1', '--platform', 'managed']
+   ```
+
+### 5. Monitoring and Maintenance
+
+1. **Set up monitoring**
+   - Use Cloud Monitoring for performance metrics
+   - Set up alerts for errors and high latency
+   - Monitor database connections and query performance
+
+2. **Regular maintenance**
+   - Keep dependencies updated
+   - Monitor and optimize database performance
+   - Regular backups of your database
+   - Review and update security settings
+
+### 6. Security Considerations
+
+1. **Database Security**
+   - Use SSL for database connections
+   - Implement proper access controls
+   - Regular security audits
+
+2. **Application Security**
+   - Implement rate limiting
+   - Use proper CORS settings
+   - Regular security updates
+   - Input validation and sanitization
+
+3. **Environment Security**
+   - Use secret management for sensitive data
+   - Implement proper IAM roles
+   - Regular security scanning
+
+### 7. Scaling Considerations
+
+1. **Horizontal Scaling**
+   - Cloud Run automatically scales based on traffic
+   - Monitor and adjust concurrency settings
+   - Use connection pooling for database connections
+
+2. **Database Scaling**
+   - Monitor database performance
+   - Consider read replicas for high read traffic
+   - Implement proper indexing
+
+3. **Cost Optimization**
+   - Monitor resource usage
+   - Use appropriate instance sizes
+   - Implement caching where possible
