@@ -67,16 +67,28 @@ const App = () => {
   const updateNextCardsNum = () => {
     if (triviaGame.length === 0) return;
     if (numCard < triviaGame.length - 1) {
-      setNumCard(prev => prev + 1);
+      setNumCard(prev => {
+        const nextIndex = prev + 1;
+        console.log(`Moving from card ${prev} to ${nextIndex}`); // Debug log
+        return nextIndex;
+      });
       setIsFlipped(false);
+    } else {
+      alert("You've reached the end of the deck! Click the reset button (↻) to start over.");
     }
   };
 
   const updatePrevCardsNum = () => {
     if (triviaGame.length === 0) return;
     if (numCard > 0) {
-      setNumCard(prev => prev - 1);
+      setNumCard(prev => {
+        const prevIndex = prev - 1;
+        console.log(`Moving from card ${prev} to ${prevIndex}`); // Debug log
+        return prevIndex;
+      });
       setIsFlipped(false);
+    } else {
+      alert("You're at the beginning of the deck! Use the next button (→) to proceed.");
     }
   };
 
@@ -84,6 +96,7 @@ const App = () => {
     setNumCard(0);
     setCurrentStreak(0);
     setIsFlipped(false);
+    alert("Deck has been reset to the beginning!");
   };
 
   const handleCreateFlashcard = async (e) => {
@@ -204,7 +217,6 @@ const App = () => {
       handleStreak();
       setTimeout(() => {
         setFeedback('');
-        updateNextCardsNum();
       }, 1500);
     } else {
       setFeedback('wrong');
@@ -217,8 +229,11 @@ const App = () => {
 
   return (
     <div className="App">
-      <h1>The Ultimate Computer Science Quiz</h1>
-      <h2>How much knowledge of Data Structure and Algorithm do you know? Test it here!</h2>
+      <div className="logo">
+        <span className="logo-text">VN</span>
+      </div>
+      <h1>Vietnamese Language Flashcard</h1>
+      <h2>Master Vietnamese vocabulary and phrases with interactive flashcards!</h2>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem' }}>
         <h4>Number of cards: {triviaGame.length}</h4>
         <h4>Card Number: #{triviaGame.length > 0 ? numCard + 1 : 0}</h4>
@@ -231,9 +246,9 @@ const App = () => {
             <>
               <GameCard
                 key={numCard}
-                question={triviaGame[numCard].question}
-                answer={triviaGame[numCard].answer}
-                level={triviaGame[numCard].level}
+                question={triviaGame[numCard]?.question || 'No question available'}
+                answer={triviaGame[numCard]?.answer || 'No answer available'}
+                level={triviaGame[numCard]?.level || 'easy'}
                 isFlipped={isFlipped}
                 onFlip={handleCardClick}
               />
@@ -262,13 +277,13 @@ const App = () => {
                 <button className='reset-button' onClick={resetFlashCard}>↻</button>
                 <button
                   className='edit-button'
-                  onClick={() => startEditing(triviaGame[numCard])}
+                  onClick={() => triviaGame[numCard] && startEditing(triviaGame[numCard])}
                 >
                   Edit Current Card
                 </button>
                 <button
                   className='delete-button'
-                  onClick={() => handleDeleteFlashcard(triviaGame[numCard].id)}
+                  onClick={() => triviaGame[numCard]?.id && handleDeleteFlashcard(triviaGame[numCard].id)}
                 >
                   Delete Current Card
                 </button>
