@@ -1,40 +1,46 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GameCard from './components/GameCard';
 
 const App = () => {
   const [isFlipped, setisFlipped] = useState(false);
-    const handleCardClick = () => {
-        setisFlipped(!isFlipped);
-    }
-  const [currentStreak, setCurrentStreak] = useState(0);//A state to store the user's correct streak.
-  const [inputs, setInputs] = useState({ //A state to store the user's input.
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [inputs, setInputs] = useState({
     'answer': '',
+    'question': '',
+    'level': 'easy'
   });
-  const [trueAnswer, setTrueAnswer] = useState({}); //A state to store the correct answer.
-  const [correct_answer, setCorrectAnswer] = useState('');// A state to store the id of wrong and correct answer for later styling.
+  const [trueAnswer, setTrueAnswer] = useState({});
+  const [correct_answer, setCorrectAnswer] = useState('');
+  const [triviaGame, setTriviaGame] = useState([]);
+  const [numCard, setNumCard] = useState(1);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
-  const handleStreak = () => { //A function that counts the user's correct answer streak.
+  // Fetch flashcards from backend
+  useEffect(() => {
+    fetchFlashcards();
+  }, []);
+
+  const fetchFlashcards = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/flashcards');
+      const data = await response.json();
+      setTriviaGame(data);
+    } catch (error) {
+      console.error('Error fetching flashcards:', error);
+    }
+  };
+
+  const handleCardClick = () => {
+    setisFlipped(!isFlipped);
+  };
+
+  const handleStreak = () => {
     setCurrentStreak(currentStreak + 1);
   };
 
-  const shuffleArray = (array) => {
-      if (array.length <= 1) return array; // If only one card, return as-is
-    const [firstCard, ...restCards] = array; // Separate the first card from the rest
-    for (let i = restCards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [restCards[i], restCards[j]] = [restCards[j], restCards[i]]; // Swap elements
-    }
-    return [firstCard, ...restCards]; // Keep the first card at index 0
-  };
-
-  const handleShuffle = () => {
-     // A function to deal with shuffling the card collection.
-    console.log("Shuffling Function is running");
-    setTriviaGame((prev) => shuffleArray(prev));
-    setNumCard(1);
-  }
-  const getSimilarity = (str1, str2) => { //Find common words between the user input and the answer by trimming unecessary words. 
+  const getSimilarity = (str1, str2) => {
     const words1 = str1.toLowerCase().split(/\s+/);
     const words2 = str2.toLowerCase().split(/\s+/);
     const set1 = new Set(words1);
@@ -42,156 +48,249 @@ const App = () => {
     const intersection = new Set([...set1].filter(word => set2.has(word)));
     const similarity = intersection.size / Math.max(set1.size, set2.size);
     return similarity;
-  }
-  const checkAnswer = (e) => {//A function to check the user's answer by finding the common words betwwen the input and the correct answer. 
-                              // The result will be correct if the user has 70% of the real answer correctly. 
+  };
+
+  const checkAnswer = (e) => {
     e.preventDefault();
     const userInput = inputs.answer.trim();
     const correctAnswer = trueAnswer.trim();
     const similarityScore = getSimilarity(userInput, correctAnswer);
+    
     if (isFlipped) {
       alert("You can't answer while the answer card is flipped");
     } else {
       if (similarityScore >= 0.5) {
         setCorrectAnswer('correct');
         handleStreak();
-        console.log(inputs['answer']);
-        
       } else {
         setCorrectAnswer('wrong');
-        console.log("wrong");
-      
       }
-      setInputs({'answer': ''});
+      setInputs(prev => ({ ...prev, answer: '' }));
     }
-  }
+  };
 
-  let [numCard, setNumCard] = useState(1);
-  
-const getNextCard = () => {
-  const nextAnswer = triviaGame[numCard].answer;
-  setTrueAnswer(nextAnswer);
-  setCorrectAnswer('');
-  console.log(nextAnswer);
-}
+  const getNextCard = () => {
+    if (triviaGame.length > 0) {
+      const nextAnswer = triviaGame[numCard]?.answer;
+      setTrueAnswer(nextAnswer);
+      setCorrectAnswer('');
+    }
+  };
 
   const updateNextCardsNum = () => {
-    if (numCard <= 10) {
-      getNextCard();
+    if (numCard < triviaGame.length - 1) {
       setNumCard(numCard + 1);
+      getNextCard();
       setCorrectAnswer('');
-      
     }
-  }
+  };
+
   const updatePrevCardsNum = () => {
-    if (numCard >= 1) {
-      setNumCard(numCard -1);
+    if (numCard > 0) {
+      setNumCard(numCard - 1);
     }
-  }
+  };
 
   const resetFlashCard = () => {
-    setNumCard(numCard = 1);
+    setNumCard(0);
     setCorrectAnswer('');
-    setInputs({'answer': ''});
+    setInputs({ answer: '', question: '', level: 'easy' });
+  };
 
-  }
-
-
-  const [triviaGame, setTriviaGame] = useState([
-    {
-      "question" : "Welcome to the most exciting Data Structure and Algorithm Quiz",
-      "answer" : "Hit the arrow button to start!",
-      "id" : "intro"
-    },
-    {
-      "question": "What is a Data Structure?",
-      "answer": "A data structure is a way to store, organize, and manage data for efficient access and modification.",
-      "id": "easy"
-    },
-    {
-      "question": "What are the main types of Data Structures?",
-      "answer": "Linear: Arrays, LinkedList, Stacks, Queues\n Non-Linear: Trees, Graphs\n Hash-based: Hash Tables, Hash Maps\n Advanced: Heaps, Tries, B-Trees",
-      "id": "medium"
-    },
-    {
-      "question": "What is Big-O Notation?",
-      "answer": "Big-O notation describes the time complexity or space complexity of an algorithm, indicating how it scales with input size.",
-      "id": "medium"
-    },
-    {
-      "question": "What are common Big-O complexities from best to worst?",
-      "answer": "O(1): Constant Time, \nO(log n): Logarithmic Time, \nO(n): Linear Time, \nO(n log n): Linearithmic Time, \nO(n²): Quadratic Time, \nO(2ⁿ): Exponential Time, \nO(n!): Factorial Time",
-      "id": "hard"
-    },
-    {
-      "question": "What is a Linked List?",
-      "answer": "A linked list is a linear data structure where each element (node) contains: Data and Pointer to the next node.",
-      "id": "easy"
-    },
-    {
-      "question": "Difference between Stack and Queue?",
-      "answer": "Stack: Last In, First Out (LIFO) – e.g., Backtracking, Undo operations\n Queue: First In, First Out (FIFO) – e.g., Scheduling tasks, Printing.",
-      "id": "medium"
-    },
-    {
-      "question": "What is a Binary Search Tree (BST)?",
-      "answer": "A BST is a tree where:\nLeft subtree nodes < Root node\nRight subtree nodes > Root node. It allows efficient searching, insertion, and deletion.",
-      "id": "medium"
-    },
-    {
-      "question": "What is a Hash Table?",
-      "answer": "A hash table is a data structure that maps keys to values using a hash function for fast access (O(1) average time).",
-      "id": "medium"
-    },
-    {
-      "question": "What are common sorting algorithms and their time complexities?",
-      "answer": "Bubble Sort: O(n²)\nSelection Sort: O(n²)\nMerge Sort: O(n log n)\nQuick Sort: O(n log n) average, O(n²) worst\nInsertion Sort: O(n²)",
-      "id": "hard"
-    },
-    {
-      "question": "What is recursion?",
-      "answer": "Recursion is a technique where a function calls itself to solve smaller instances of the same problem.",
-      "id": "easy"
+  const handleCreateFlashcard = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:3001/api/flashcards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: inputs.question,
+          answer: inputs.answer,
+          level: inputs.level
+        }),
+      });
+      
+      if (response.ok) {
+        await fetchFlashcards();
+        setInputs({ answer: '', question: '', level: 'easy' });
+        alert('New flashcard created successfully!');
+      }
+    } catch (error) {
+      console.error('Error creating flashcard:', error);
+      alert('Failed to create flashcard. Please try again.');
     }
-]);
+  };
 
-  
-  return ( 
+  const handleEditFlashcard = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`http://localhost:3001/api/flashcards/${editingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: inputs.question,
+          answer: inputs.answer,
+          level: inputs.level
+        }),
+      });
+      
+      if (response.ok) {
+        await fetchFlashcards();
+        setIsEditing(false);
+        setEditingId(null);
+        setInputs({ answer: '', question: '', level: 'easy' });
+        alert('Flashcard updated successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating flashcard:', error);
+      alert('Failed to update flashcard. Please try again.');
+    }
+  };
+
+  const handleDeleteFlashcard = async (id) => {
+    if (window.confirm('Are you sure you want to delete this flashcard?')) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/flashcards/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          await fetchFlashcards();
+          if (numCard >= triviaGame.length - 1) {
+            setNumCard(Math.max(0, triviaGame.length - 2));
+          }
+          alert('Flashcard deleted successfully!');
+        }
+      } catch (error) {
+        console.error('Error deleting flashcard:', error);
+        alert('Failed to delete flashcard. Please try again.');
+      }
+    }
+  };
+
+  const startEditing = (card) => {
+    setIsEditing(true);
+    setEditingId(card.id);
+    setInputs({
+      question: card.question,
+      answer: card.answer,
+      level: card.level
+    });
+  };
+
+  return (
     <div className="App">
       <h1>The Ultimate Computer Science Quiz</h1>
       <h2>How much knowledge of Data Structure and Algorithm do you know? Test it here!</h2>
-      <h4>Number of cards: 11</h4>
-      <h4>Card Number: #{numCard}</h4>
-      <h4>Current Streak: {currentStreak}</h4>
-    
-      <br/>
-      {numCard <= triviaGame.length  && numCard >= 1 ? (
-        <GameCard key={numCard} question={triviaGame[numCard - 1].question} answer= {triviaGame[numCard - 1].answer} level={triviaGame[numCard - 1].id} isFlipped={isFlipped} onFlip={handleCardClick}/>
-      ): (
-        <p>No more cards left!!</p>
-      )}
-      <form className='container'>
-        <div className='mini-container'>
-           
-          <div className='answer-space' id={correct_answer}>
-          Guess the answer here:
-            <input type='text' name='answer' value={inputs.answer} placeholder='Place your answer here...' onChange={(e) => setInputs((prevState) => ({
-              ...prevState,
-              [e.target.name]: e.target.value,
-            }))}>
-            </input>
-            <button type='submit' className='submit-Btn' onClick={checkAnswer}>Submit Guess</button>
-          </div>
-          
-          
-        </div>
-      </form>
-      <button type='button' className='previousCard'onClick={updatePrevCardsNum}>⭠</button>
-      <button type='button' className='nextCard'onClick={updateNextCardsNum}>→</button>
-      <button className='reset-button' onClick={resetFlashCard}>↻</button>
-      <button type='shuffle' className='shuffle-Btn' onClick={handleShuffle}>Shuffle Cards</button>
-    </div>
-  )
-}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem' }}>
+        <h4>Number of cards: {triviaGame.length}</h4>
+        <h4>Card Number: #{numCard + 1}</h4>
+        <h4>Current Streak: {currentStreak}</h4>
+      </div>
 
-export default App
+      <div className="main-content">
+        <div className="game-area">
+          {triviaGame.length > 0 && numCard < triviaGame.length ? (
+            <GameCard
+              key={numCard}
+              question={triviaGame[numCard].question}
+              answer={triviaGame[numCard].answer}
+              level={triviaGame[numCard].level}
+              isFlipped={isFlipped}
+              onFlip={handleCardClick}
+            />
+          ) : (
+            <p>No more cards left!!</p>
+          )}
+
+          <form className='container'>
+            <div className='mini-container'>
+              <div className='answer-space' id={correct_answer}>
+                Guess the answer here:
+                <input
+                  type='text'
+                  name='answer'
+                  value={inputs.answer}
+                  placeholder='Place your answer here...'
+                  onChange={(e) => setInputs(prev => ({ ...prev, [e.target.name]: e.target.value }))}
+                />
+                <button type='submit' className='submit-Btn' onClick={checkAnswer}>
+                  Submit Guess
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div className="card-controls">
+            <button type='button' className='previousCard' onClick={updatePrevCardsNum}>⭠</button>
+            <button type='button' className='nextCard' onClick={updateNextCardsNum}>→</button>
+            <button className='reset-button' onClick={resetFlashCard}>↻</button>
+            {triviaGame.length > 0 && numCard < triviaGame.length && (
+              <button
+                className='edit-button'
+                onClick={() => startEditing(triviaGame[numCard])}
+              >
+                Edit Current Card
+              </button>
+            )}
+            {triviaGame.length > 0 && numCard < triviaGame.length && (
+              <button
+                className='delete-button'
+                onClick={() => handleDeleteFlashcard(triviaGame[numCard].id)}
+              >
+                Delete Current Card
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="card-management">
+          <h3>{isEditing ? 'Edit Flashcard' : 'Create New Flashcard'}</h3>
+          <form onSubmit={isEditing ? handleEditFlashcard : handleCreateFlashcard}>
+            <input
+              type="text"
+              name="question"
+              value={inputs.question}
+              placeholder="Enter question"
+              onChange={(e) => setInputs(prev => ({ ...prev, [e.target.name]: e.target.value }))}
+            />
+            <input
+              type="text"
+              name="answer"
+              value={inputs.answer}
+              placeholder="Enter answer"
+              onChange={(e) => setInputs(prev => ({ ...prev, [e.target.name]: e.target.value }))}
+            />
+            <select
+              name="level"
+              value={inputs.level}
+              onChange={(e) => setInputs(prev => ({ ...prev, [e.target.name]: e.target.value }))}
+            >
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+            <button type="submit">
+              {isEditing ? 'Update Flashcard' : 'Create Flashcard'}
+            </button>
+            {isEditing && (
+              <button type="button" onClick={() => {
+                setIsEditing(false);
+                setEditingId(null);
+                setInputs({ answer: '', question: '', level: 'easy' });
+              }}>
+                Cancel Edit
+              </button>
+            )}
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
