@@ -1,4 +1,4 @@
-# CS Flashcard - Interactive Learning Platform
+# Vietnamese Learning Flashcard - Interactive Learning Platform
 
 A modern, interactive flashcard application designed to help users learn and test their knowledge of Computer Science concepts, particularly focusing on Data Structures and Algorithms.
 
