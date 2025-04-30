@@ -9,6 +9,8 @@ const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const App = () => {
+  // Add this with other state declarations at the top of the App component
+  const [answeredCards, setAnsweredCards] = useState(new Set());
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [inputs, setInputs] = useState({
@@ -204,6 +206,7 @@ const App = () => {
     e.preventDefault();
     const userInput = inputs.answer.trim();
     const correctAnswer = triviaGame[numCard]?.answer.trim();
+    const currentCardId = triviaGame[numCard]?.id;
     
     if (!userInput) {
       alert('Please enter an answer');
@@ -224,7 +227,11 @@ const App = () => {
     
     if (similarityScore >= 0.4) {
       setFeedback('correct');
-      handleStreak();
+      if (!answeredCards.has(currentCardId)) {
+        handleStreak();
+        setAnsweredCards(prev => new Set([...prev, currentCardId]));
+      }
+      
       setTimeout(() => {
         setFeedback('');
       }, 1500);
