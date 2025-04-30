@@ -99,6 +99,16 @@ const App = () => {
     alert("Deck has been reset to the beginning!");
   };
 
+  const shuffleCards = () => {
+    setTriviaGame(prevCards => {
+      const shuffled = [...prevCards].sort(() => Math.random() - 0.5);
+      setNumCard(0);
+      setIsFlipped(false);
+      return shuffled;
+    });
+    alert("Cards have been shuffled!");
+  };
+
   const handleCreateFlashcard = async (e) => {
     e.preventDefault();
     if (!inputs.question.trim() || !inputs.answer.trim()) {
@@ -275,6 +285,7 @@ const App = () => {
                 <button type='button' className='previousCard' onClick={updatePrevCardsNum}>⭠</button>
                 <button type='button' className='nextCard' onClick={updateNextCardsNum}>→</button>
                 <button className='reset-button' onClick={resetFlashCard}>↻</button>
+                <button className='shuffle-button' onClick={shuffleCards}>🔀</button>
                 <button
                   className='edit-button'
                   onClick={() => triviaGame[numCard] && startEditing(triviaGame[numCard])}
