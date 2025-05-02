@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 
-const GameCard = ({question, answer, isFlipped, onFlip, level}) => {
+const GameCard = ({question, answer, isFlipped, onFlip, level, onSpeak}) => {
     const cardRef = useRef(null);
     const [isTouching, setIsTouching] = useState(false);
 
@@ -23,6 +23,10 @@ const GameCard = ({question, answer, isFlipped, onFlip, level}) => {
         };
 
         const handleClick = (e) => {
+            if (e.target.closest('.speak-button')) {
+                // If the click is on the speak button, do not flip
+                return;
+            }
             e.preventDefault();
             if (!isTouching) { // Only handle click if not from touch
                 onFlip();
@@ -52,7 +56,15 @@ const GameCard = ({question, answer, isFlipped, onFlip, level}) => {
             id={level}
             style={{ touchAction: 'manipulation' }}
         >
-            <div className="front">{question}</div>
+            <div className="front">
+                {question}
+                <button className="speak-button" onClick={(e) => {
+                    e.stopPropagation();
+                    onSpeak(question);
+                }}>
+                    🔊
+                </button>
+            </div>
             <div className="back">{answer}</div>
         </div>
     );

@@ -244,6 +244,13 @@ const App = () => {
     setInputs(prev => ({ ...prev, answer: '' }));
   };
 
+  const speakWord = (text) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'vi-VN'; // Set the language to Vietnamese
+    utterance.rate = 0.85; // Set the speech rate (1 is normal speed)
+    window.speechSynthesis.speak(utterance);
+  }
+
   return (
     <div className="App">
       <div className="logo">
@@ -268,6 +275,7 @@ const App = () => {
                 level={triviaGame[numCard]?.level || 'easy'}
                 isFlipped={isFlipped}
                 onFlip={handleCardClick}
+                onSpeak={speakWord}
               />
 
               <form className='container'>
