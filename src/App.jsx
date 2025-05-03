@@ -1,5 +1,5 @@
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import GameCard from './components/GameCard';
 import { createClient } from '@supabase/supabase-js';
 
@@ -7,7 +7,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
-
 const App = () => {
   // Add this with other state declarations at the top of the App component
   const [answeredCards, setAnsweredCards] = useState(new Set());
@@ -23,7 +22,21 @@ const App = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [feedback, setFeedback] = useState('');
+  const [voices, setVoices] = useState([]);
 
+  useEffect(() => {
+    const loadVoices = () => {
+      const availableVoices = window.speechSynthesis.getVoices();
+      setVoices(availableVoices);
+    };
+  
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    
+    return () => {
+      window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+    };
+  }, []);
   // Fetch flashcards from Supabase
   useEffect(() => {
     fetchFlashcards();
@@ -244,12 +257,62 @@ const App = () => {
     setInputs(prev => ({ ...prev, answer: '' }));
   };
 
+  // Remove or comment out the existing googleTTS function
+
   const speakWord = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'vi-VN'; // Set the language to Vietnamese
-    utterance.rate = 0.85; // Set the speech rate (1 is normal speed)
-    window.speechSynthesis.speak(utterance);
-  }
+    if (!window.speechSynthesis) {
+      console.warn('Speech synthesis not supported');
+      return;
+    }
+  
+    try {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+  
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'vi-VN';
+      utterance.rate = 0.8;
+      utterance.pitch = 1.0;
+  
+      // Get available voices
+      const voices = window.speechSynthesis.getVoices();
+      console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+  
+      // Try to find a Vietnamese voice
+      const vietnameseVoice = voices.find(voice => 
+        voice.lang === 'vi-VN' || 
+        voice.name.toLowerCase().includes('vietnamese')
+      );
+  
+      if (vietnameseVoice) {
+        console.log('Using Vietnamese voice:', vietnameseVoice.name);
+        utterance.voice = vietnameseVoice;
+      } else {
+        // Fallback to any available voice that can handle Vietnamese
+        utterance.lang = 'vi-VN';
+        console.log('No specific Vietnamese voice found, using default voice');
+      }
+  
+      // Handle successful speech
+      utterance.onend = () => {
+        console.log('Speech completed successfully');
+      };
+  
+      // Handle speech errors without showing alerts
+      utterance.onerror = (event) => {
+        if (event.error === 'canceled') {
+          // Ignore cancellation errors
+          return;
+        }
+        console.warn('Speech synthesis error:', event.error);
+      };
+  
+      window.speechSynthesis.speak(utterance);
+  
+    } catch (error) {
+      console.warn('Speech synthesis error:', error);
+    }
+  };
 
   return (
     <div className="App">
