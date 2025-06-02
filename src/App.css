@@ -128,6 +128,13 @@ body h4 {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
+    transform-style: preserve-3d;
+  perspective: 1000px;
+  -moz-transform-style: preserve-3d;
+  -moz-perspective: 1000px;
+  transition: transform 0.6s;
+  position: relative;
+  background: transparent;
 }
 
 .card.touch-active {
@@ -592,11 +599,36 @@ button:active {
 
   .card {
     height: 150px;
+      transform-style: preserve-3d;
+  perspective: 1000px;
+  -moz-transform-style: preserve-3d; /* Firefox specific */
+  -moz-perspective: 1000px; /* Firefox specific */
   }
 
   .card .front, .card .back {
     font-size: 14px;
+    position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  backface-visibility: hidden;
+  -moz-backface-visibility: hidden; /* Firefox specific */
+  transform: rotateY(0deg);
+  background: white; /* Ensure background is set */
   }
+
+  .card .back {
+  transform: rotateY(180deg);
+}
+
+.card.flipped .front {
+  transform: rotateY(180deg);
+}
+
+.card.flipped .back {
+  transform: rotateY(360deg);
+}
 
   .card-controls button {
     padding: 0.4em 0.8em;
@@ -804,6 +836,9 @@ button:not(:disabled):active {
   align-items: center;
   justify-content: center;
   z-index: 2;
+    opacity: 1;
+  visibility: visible;
+  transition: all 0.3s ease;
 }
 
 .speak-button:hover {
@@ -814,4 +849,32 @@ button:not(:disabled):active {
 
 .speak-button:active {
   transform: scale(0.95);
+}
+
+.card.flipped .front .speak-button {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.card.flipped .back .speak-button {
+  opacity: 1;
+  visibility: visible;
+}
+/* Firefox-specific fixes */
+@-moz-document url-prefix() {
+  .card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .card .front,
+  .card .back {
+    backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+  }
+
+  .card.flipped .front {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
